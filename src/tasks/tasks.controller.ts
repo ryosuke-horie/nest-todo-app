@@ -1,5 +1,7 @@
 // デコレーターを使用するためのインポート
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { TaskPropertyDto } from './dto/task-property.dto';
+import { TaskStatusPipe } from './pipe/task-status.pipe';
 
 // taskコントローラー（ルーティング）
 @Controller('tasks')
@@ -19,9 +21,10 @@ export class TasksController {
 
     // 新規タスク登録
     @Post()
+    @UsePipes(ValidationPipe) // @UsePipesを付与したメソッドはバリデーションパイプ(今回でいうとTaskPropertyDtoで定義した値の空検証)が有効になります
     createTask(
-        @Body('title') title: string,
-        @Body('description') description: string) {
+        @Body() taskPropertyDto: TaskPropertyDto) {
+        const { title, description } = taskPropertyDto
         return `createTask Success! Prameter [title:${title}, descritpion:${description}]`
     }
 
@@ -37,7 +40,7 @@ export class TasksController {
     updateTask(
         // パイプを使用して、idを数値型に変換
         @Param('id', ParseIntPipe) id: number,
-        @Body('status') status: string ) {
+        @Body('status') status: string) {
         return `updateTask Success! Prameter [id:${id}, status:${status}]`
     }
 }
