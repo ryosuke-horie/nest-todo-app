@@ -19,11 +19,11 @@ export class TasksService {
 
     // [id]のタスク取得
     async getTaskById(id: number): Promise<Task> {
-        // エラー：型 'number' には型 'FindOneOptions<Task>' と共通のプロパティがありません。
-        // const found = await this.taskRepository.findOne(id);
-
-        // idをキーに検索
-        const found = await this.taskRepository.findOneBy({id});
+        const found = await this.taskRepository.findOne({
+            where: {
+              id: id,
+            },
+          });
 
         if (!found) {
             throw new NotFoundException();
