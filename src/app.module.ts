@@ -1,21 +1,25 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmConfigService } from './config/typeorm-config.service';
 import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
+    /** env読み込み
+    *   環境変数NODE_ENVの値によって読み込むファイルを切り替える。
+    *   default.envは後続で呼ばれる。同じ変数がある場合は先に定義されているものが優先される。
+    */ 
+    ConfigModule.forRoot({
+      envFilePath: [`.env/${process.env.NODE_ENV}.env`,'.env/default.env'],
+      isGlobal: true,
+    }),
+    // TypeORMの設定を非同期取得に変更
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: TypeOrmConfigService,
+    }),
     TasksModule,
-    // importsに追加
-    TypeOrmModule.forRoot({
-      type: 'postgres',       // DBの種類
-      port: 5432,             // 使用ポート
-      database: 'postgres',    // データベース名
-      host: 'localhost',      // DBホスト名
-      username: 'postgres',       // DBユーザ名
-      password: 'passw0rd',       // DBパスワード
-      synchronize: true,      // モデル同期(trueで同期)
-      entities: [__dirname + '/**/*.entity.{js,ts}'],  // ロードするエンティティ
-    })
   ],
 })
 export class AppModule {}
